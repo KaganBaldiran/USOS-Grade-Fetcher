@@ -36,9 +36,7 @@ public class BatchCreator
                 + "    start /wait \"\" \"%saveLocation%\"\n"
                 + ") else (\n"
                 + "    goto check_file\n"
-                + ")\n"
-                + "\n"
-                + "REM Rest of your batch file";
+                + ")\n";
 
         String batchFilePath = "InstallSDK.bat";
 
