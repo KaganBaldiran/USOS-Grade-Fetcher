@@ -57,86 +57,101 @@ public class WebHandler
 
         if(Allow) {
 
+            String href = null;
+            boolean TechnicalError = false;
+
             driver.findElement(By.name("DLA STUDENTÓW")).click();
-            String href = driver.findElement(By.xpath("//*[@id=\"layout-c22\"]/usos-module-link-tile-container/usos-module-link-tile[3]")).getAttribute("href");
+            try {
+                href = driver.findElement(By.xpath("//*[@id=\"layout-c22\"]/usos-module-link-tile-container/usos-module-link-tile[3]")).getAttribute("href");
 
-            driver.get(href);
+            } catch (RuntimeException e) {
+                TechnicalError = true;
+            }
 
-            driver.manage().timeouts().implicitlyWait(Duration.ofMillis(500));
+            if(!TechnicalError) {
 
-            String currentlink = driver.getCurrentUrl();
-            driver.get(currentlink + "&lang=en");
+                driver.get(href);
 
-            driver.manage().timeouts().implicitlyWait(Duration.ofMillis(100));
+                driver.manage().timeouts().implicitlyWait(Duration.ofMillis(500));
 
-            List<WebElement> tables = driver.findElements(By.className("expand-collapse"));
+                String currentlink = driver.getCurrentUrl();
+                driver.get(currentlink + "&lang=en");
 
-            String University_name = driver.findElement(By.tagName("app-header")).getText();
+                driver.manage().timeouts().implicitlyWait(Duration.ofMillis(100));
 
-            String user_name = driver.findElement(By.id("layout-cas-bar")).getAttribute("logged-user");
+                List<WebElement> tables = driver.findElements(By.className("expand-collapse"));
 
-            String semesterfromfile = ReadDataFromJSONFile("credentials.json", "semester");
+                String University_name = driver.findElement(By.tagName("app-header")).getText();
 
-            String path = "grades.txt";
+                String user_name = driver.findElement(By.id("layout-cas-bar")).getAttribute("logged-user");
 
-            boolean Semesterfound = false;
+                String semesterfromfile = ReadDataFromJSONFile("credentials.json", "semester");
 
-            if (tables.size() != 0) {
-                for (WebElement table : tables) {
-                    String semester = table.findElement(By.className("ec-header")).getText();
+                String path = "grades.txt";
 
-                    if (semester.equalsIgnoreCase(semesterfromfile)) {
+                boolean Semesterfound = false;
 
-                        Semesterfound = true;
-                        String table_content = table.getText();
-                        StringBuilder sb = new StringBuilder(table_content);
+                if (tables.size() != 0) {
+                    for (WebElement table : tables) {
+                        String semester = table.findElement(By.className("ec-header")).getText();
+
+                        if (semester.equalsIgnoreCase(semesterfromfile)) {
+
+                            Semesterfound = true;
+                            String table_content = table.getText();
+                            StringBuilder sb = new StringBuilder(table_content);
 
 
-                        String finalstring = "";
+                            String finalstring = "";
 
-                        for (int i = 0; i < sb.length() - 7; i++) {
+                            for (int i = 0; i < sb.length() - 7; i++) {
 
-                            if (sb.substring(i, i + 7).equalsIgnoreCase("details")) {
-                                System.out.println("EQUALS!");
-                                sb.insert(i + 7, "\n");
+                                if (sb.substring(i, i + 7).equalsIgnoreCase("details")) {
+                                    System.out.println("EQUALS!");
+                                    sb.insert(i + 7, "\n");
 
+                                }
+                            }
+
+                            sb.insert(0, University_name + "\n" + "Student: " + user_name + "\nData was fetched using the web automating script written by Kagan Baldiran\n\n");
+                            finalstring = sb.toString();
+
+                            try {
+                                Files.write(Path.of(path), finalstring.getBytes());
+                            } catch (IOException e) {
+                                throw new RuntimeException(e);
                             }
                         }
 
-                        sb.insert(0 , University_name + "\n" + "Student: " +user_name +  "\nData was fetched using the web automating script written by Kagan Baldiran\n\n");
-                        finalstring = sb.toString();
+                    }
 
+                    driver.quit();
+                    LoadingThread.interrupt();
+
+                    if (!Semesterfound) {
+                        JOptionPane.showMessageDialog(null, "Incorrect semester name!", "Error", JOptionPane.ERROR_MESSAGE);
+                    }
+
+                    if (Semesterfound) {
                         try {
-                            Files.write(Path.of(path), finalstring.getBytes());
+                            Desktop.getDesktop().open(Path.of(path).toFile());
                         } catch (IOException e) {
                             throw new RuntimeException(e);
                         }
                     }
 
+
+                } else {
+                    driver.quit();
+                    LoadingThread.interrupt();
+                    JOptionPane.showMessageDialog(null, "No table found!", "Error", JOptionPane.ERROR_MESSAGE);
                 }
+            }
+            else {
 
                 driver.quit();
                 LoadingThread.interrupt();
-
-                if(!Semesterfound)
-                {
-                    JOptionPane.showMessageDialog(null,"Incorrect semester name!" , "Error" , JOptionPane.ERROR_MESSAGE);
-                }
-
-                if(Semesterfound)
-                {
-                    try {
-                        Desktop.getDesktop().open(Path.of(path).toFile());
-                    } catch (IOException e) {
-                        throw new RuntimeException(e);
-                    }
-                }
-
-            } else
-            {
-                driver.quit();
-                LoadingThread.interrupt();
-                JOptionPane.showMessageDialog(null,"No table found!" , "Error" , JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(null,"Technical Break!" , "Error" , JOptionPane.ERROR_MESSAGE);
             }
         }
         else
