@@ -20,7 +20,7 @@ This application utilizes web automation techniques to log into the USOS system,
 ## Installation
 
 1. Clone the repository to your local machine.
-2. Open the `config.json` file and enter your USOS login credentials.
+2. Open the `credentials.json` file and enter your USOS login credentials.
 3. Build the project using the following command:
 javac -d bin src/*.java
 4. Create a JAR file from the compiled classes:
