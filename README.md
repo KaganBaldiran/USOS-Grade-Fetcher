@@ -55,6 +55,3 @@ This project is licensed under the MIT License.
 If you have any questions or feedback, feel free to reach out:
 
 - Email: [k.baldiran@hotmail.com](mailto:k.baldiran@hotmail.com)
-
-We appreciate your interest and support!
-
